@@ -32,7 +32,11 @@ var recipes = [
 
 var app = {
     agStore: {},
-    reset: function() {},
+    reset: function() {
+        app.agStore.remove().then( function() {
+            app.initData();
+        });
+    },
     renderRecipeList: function( dataz ) {
 
         var i = 0,
@@ -59,6 +63,9 @@ var app = {
         // Find the recipe based on the id
         app.agStore.read( id ).then( function( data ) {
             $( ".content" ).append( _.template( detailTemplate, data[ 0 ] ) );
+        })
+        .then( null, function( error ) {
+            console.log( error );
         });
 
         // transition
@@ -102,16 +109,20 @@ var app = {
 
         app.agStore = dm.stores.recipes;
 
-        app.agStore.save( recipes ).then( function( data ) {
-            app.renderRecipeList( data );
-        });
+        app.initData();
 
         //Event Listeners
         $( "ul.topcoat-list__container" ).on( "click", app.renderRecipeDetail );
         $( "span.back" ).on( "click", app.home );
+        $( "button.reset" ).on( "click", app.reset );
         $( "span.plus" ).on( "click", app.add );
         $( "form" ).on( "submit", app.formSubmit );
         $( "input[name='cancel']" ).on( "click", app.cancel );
+    },
+    initData: function() {
+        app.agStore.save( recipes ).then( function( data ) {
+            app.renderRecipeList( data );
+        });
     }
 };
 
